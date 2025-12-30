@@ -8,6 +8,6 @@
         public string ngaySinh { get; set; }
         public string gioiTinh { get; set; }  
         public string? maSoBHXH { get; set; }
-        public string? maTheBHXH { get; set; }
+      //  public string? maTheBHXH { get; set; }
     }
 }

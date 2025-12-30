@@ -262,7 +262,7 @@ namespace TraCuuBHXH_BHYT.Service
                 if (existingRecord != null)
                 {
                     // Cập nhật dữ liệu hiện có
-                    existingRecord.MaTheBHYT = request.maTheBHXH ?? existingRecord.MaTheBHYT;
+                   // existingRecord.MaTheBHYT = request.maTheBHXH ?? existingRecord.MaTheBHYT;
                     existingRecord.MaSoBHXH = request.maSoBHXH ?? existingRecord.MaSoBHXH;
                     existingRecord.UpdatedDate = DateTime.Now;
 
@@ -291,7 +291,7 @@ namespace TraCuuBHXH_BHYT.Service
                         HoTen = request.hoTen.Trim(),
                         NgaySinh = request.ngaySinh.Trim(),
                         GioiTinh = gioiTinhInverted,
-                        MaTheBHYT = request.maTheBHXH,
+                      //  MaTheBHYT = request.maTheBHXH,
                         MaSoBHXH = request.maSoBHXH,
                         UpdatedDate = DateTime.Now,
                         IdDoiTuong = 1  // Giá trị mặc định, có thể điều chỉnh theo yêu cầu

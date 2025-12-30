@@ -6,5 +6,6 @@ namespace TraCuuBHXH_BHYT.Interface
     {
         (bool IsValid, string ErrorMessage) ValidateBearerToken(string authorization);
         Task<TokenResult> GetTokenAsync(string authorizationHeader);
+        Task<TokenResult> GetTokenAsync_V2(string authorizationHeader);
     }
 }

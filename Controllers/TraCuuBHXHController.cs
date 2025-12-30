@@ -79,11 +79,38 @@ namespace TraCuuBHXH_BHYT.Controllers
 
         // API lấy token NGSP (tách riêng)
         [HttpPost("token")]
-        public async Task<IActionResult> GetTokenAsyncV2([FromHeader(Name = "Authorization")] string authorization)
+        public async Task<IActionResult> GetTokenAsync([FromHeader(Name = "Authorization")] string authorization)
         {
             try
             {
                 var token = await _tokenValidationService.GetTokenAsync(authorization);
+                if (string.IsNullOrWhiteSpace(token.access_token))
+                {
+                    return Unauthorized("Không lấy được token");
+                }
+                return Ok(token);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch
+            {
+                return StatusCode(500, "Lỗi hệ thống");
+            }
+        }
+
+        // API lấy token NGSP V2 (tách riêng)
+        [HttpPost("tokenV2")]
+        public async Task<IActionResult> GetTokenAsyncV2([FromHeader(Name = "Authorization")] string authorization, [FromForm] string grant_type)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(grant_type) || !string.Equals(grant_type, "client_credentials", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest("Thiếu hoặc grant_type không hợp lệ");
+                }
+                var token = await _tokenValidationService.GetTokenAsync_V2(authorization);
                 if (string.IsNullOrWhiteSpace(token.access_token))
                 {
                     return Unauthorized("Không lấy được token");
