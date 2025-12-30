@@ -1,0 +1,6 @@
+@TraCuuBHXH_BHYT_HostAddress = http://localhost:5181
+
+GET {{TraCuuBHXH_BHYT_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
