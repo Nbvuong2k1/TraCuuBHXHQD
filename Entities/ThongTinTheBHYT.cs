@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace TraCuuBHXH_BHYT.Entities
 {
     public class ThongTinTheBHYT
@@ -103,11 +105,13 @@ namespace TraCuuBHXH_BHYT.Entities
 
         public byte? IsOnlyBirthYear { get; set; }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public string? FormattedUpdatedDate { get; set; }
         public string? SiBookNumOld { get; set; }
 
         public string? TenBenhVien { get; set; }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public string? MaKCB { get; set; }
         public DMKhoiKCBEntity KhoiKCB { get; set; }
 

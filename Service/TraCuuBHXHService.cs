@@ -249,10 +249,110 @@ namespace TraCuuBHXH_BHYT.Service
                 // ============================
                 if (existingRecord != null)
                 {
-                    // Cập nhật dữ liệu hiện có
-                    existingRecord.MaTheBHYT = request.MaTheBHXH ?? existingRecord.MaTheBHYT;
-                    existingRecord.MaSoBHXH = request.MaSoBHXH ?? existingRecord.MaSoBHXH;
                     existingRecord.UpdatedDate = DateTime.Now;
+
+                    existingRecord.IDTheBHYT = request.IDTheBHYT ?? existingRecord.IDTheBHYT;
+                    existingRecord.IDDonVi = request.IDDonVi ?? existingRecord.IDDonVi;
+                    existingRecord.IdDoiTuong = request.IDDoiTuong != null ? (short)request.IDDoiTuong : existingRecord.IdDoiTuong;
+                    existingRecord.MaCSKCB = request.IDBenhVien != null ? (short)request.IDBenhVien : existingRecord.MaCSKCB;
+                    existingRecord.IDHSCN = request.IDHSCN ?? existingRecord.IDHSCN;
+                    existingRecord.IDHangMucYTe = request.IDHangMucYTe != null ? (short)request.IDHangMucYTe : existingRecord.IDHangMucYTe;
+                    existingRecord.IDYTeTinh = request.IDYTeTinh != null ? (short)request.IDYTeTinh : existingRecord.IDYTeTinh;
+                    existingRecord.IDHoTro = request.IDHoTro != null ? (short)request.IDHoTro : existingRecord.IDHoTro;
+                    existingRecord.IDYteDoiTuon = request.IDYteDoiTuong != null ? (short)request.IDYteDoiTuong : existingRecord.IDYteDoiTuon;
+
+                    existingRecord.UserId = request.UserId?.ToString() ?? existingRecord.UserId;
+                    existingRecord.MaSoBHXH = request.MaSoBHXH ?? existingRecord.MaSoBHXH;
+                    existingRecord.MaTheBHYT = request.MiCardNum ?? existingRecord.MaTheBHYT;
+
+                    existingRecord.TuNgay = request.TuNgay != null
+                        ? DateOnly.FromDateTime((DateTime)request.TuNgay)
+                        : existingRecord.TuNgay;
+
+                    existingRecord.DenNgay = request.DenNgay != null
+                        ? DateOnly.FromDateTime((DateTime)request.DenNgay)
+                        : existingRecord.DenNgay;
+
+                    existingRecord.DaHetHan = request.DaHetHan ?? existingRecord.DaHetHan;
+                    existingRecord.Status = request.Status != null ? (byte)request.Status : existingRecord.Status;
+                    existingRecord.PhatHanh = request.PhatHanh != null ? (byte)(request.PhatHanh == true ? 1 : 0) : existingRecord.PhatHanh;
+
+                    existingRecord.DaIn = request.DaIn ?? existingRecord.DaIn;
+                    existingRecord.NgayIn = request.NgayIn != null ? DateOnly.FromDateTime((DateTime)request.NgayIn) : existingRecord.NgayIn;
+                    existingRecord.NguoiIn = request.UserPrintedId?.ToString() ?? existingRecord.NguoiIn;
+
+                    existingRecord.MaGiam = request.MaLoi ?? existingRecord.MaGiam;
+                    existingRecord.NgayGiam = request.NgayGiam != null ? DateOnly.FromDateTime((DateTime)request.NgayGiam) : existingRecord.NgayGiam;
+
+                    existingRecord.ThuHoi = request.ThuHoi ?? existingRecord.ThuHoi;
+                    existingRecord.NgayThuHoi = request.NgayThuHoi != null ? DateOnly.FromDateTime((DateTime)request.NgayThuHoi) : existingRecord.NgayThuHoi;
+                    existingRecord.NguoiThuHoi = request.UserId?.ToString() ?? existingRecord.NguoiThuHoi;
+
+                    existingRecord.SoThangLienTuc = request.SoThangLienTuc ?? existingRecord.SoThangLienTuc;
+                    existingRecord.Ngay5NamLienTuc = request.Ngay5NamLienTuc != null
+                        ? DateOnly.FromDateTime((DateTime)request.Ngay5NamLienTuc)
+                        : existingRecord.Ngay5NamLienTuc;
+
+                    existingRecord.IsLockPrint = request.IsLockPrint ?? existingRecord.IsLockPrint;
+                    existingRecord.UserLockPrintId = request.UserLockPrintId?.ToString() ?? existingRecord.UserLockPrintId;
+
+                    existingRecord.DiaChi = request.DiaChi ?? existingRecord.DiaChi;
+                    existingRecord.MaTinhDangSong = request.MaTinhDangSong ?? existingRecord.MaTinhDangSong;
+
+                    existingRecord.SoCCCD = request.SoCccd?.Trim() ?? existingRecord.SoCCCD;
+                    existingRecord.HoTen = request.HoTen?.Trim() ?? existingRecord.HoTen;
+                    existingRecord.NgaySinh = request.NgaySinh?.Trim() ?? existingRecord.NgaySinh;
+                    existingRecord.GioiTinh = gioiTinhInverted;
+
+                    existingRecord.NgayPhatHanh = request.NgayPhatHanh != null
+                        ? DateOnly.FromDateTime((DateTime)request.NgayPhatHanh)
+                        : existingRecord.NgayPhatHanh;
+
+                    existingRecord.GhiChu = request.GhiChu ?? existingRecord.GhiChu;
+                    existingRecord.TrangThaiPheDuyet = request.TrangThaiPheDuyet ?? existingRecord.TrangThaiPheDuyet;
+                    existingRecord.NgayPheDuyet = request.NgayPheDuyet != null
+                        ? DateOnly.FromDateTime((DateTime)request.NgayPheDuyet)
+                        : existingRecord.NgayPheDuyet;
+
+                    existingRecord.ApproveMoveDate = request.ApproveMoveDate != null
+                        ? DateOnly.FromDateTime((DateTime)request.ApproveMoveDate)
+                        : existingRecord.ApproveMoveDate;
+
+                    existingRecord.ApproveUserId = request.ApproveUserId ?? existingRecord.ApproveUserId;
+                    existingRecord.ApproveMoveStatus = request.ApproveMoveStatus ?? existingRecord.ApproveMoveStatus;
+                    existingRecord.ApproveMoveUserId = request.ApproveMoveUserId?.ToString() ?? existingRecord.ApproveMoveUserId;
+
+                    existingRecord.RenewalKey = request.RenewalKey ?? existingRecord.RenewalKey;
+                    existingRecord.IsChangedInfo = request.IsChangedInfo ?? existingRecord.IsChangedInfo;
+                    existingRecord.MiCardOldId = request.MiCardOldId ?? existingRecord.MiCardOldId;
+
+                    existingRecord.ArriveDocumentType = request.ArriveDocumentType ?? existingRecord.ArriveDocumentType;
+                    existingRecord.ArriveDocumentCode = request.ArriveDocumentCode ?? existingRecord.ArriveDocumentCode;
+
+                    existingRecord.IsDebt = request.IsDebt ?? existingRecord.IsDebt;
+                    existingRecord.DebtDate = request.DebtDate != null
+                        ? DateOnly.FromDateTime((DateTime)request.DebtDate)
+                        : existingRecord.DebtDate;
+
+                    existingRecord.DebtUserId = request.DebtUserId ?? existingRecord.DebtUserId;
+                    existingRecord.ReferenceNumber = request.ReferenceNumber ?? existingRecord.ReferenceNumber;
+                    existingRecord.ArriveNumber = request.ArriveNumber ?? existingRecord.ArriveNumber;
+
+                    existingRecord.PersonalProfileCorrectionId =
+                        request.PersonalProfileCorrectionId ?? existingRecord.PersonalProfileCorrectionId;
+
+                    existingRecord.IsSynVss = request.IsSynVss ?? existingRecord.IsSynVss;
+                    existingRecord.AddressProvinceId = request.AddressProvinceId ?? existingRecord.AddressProvinceId;
+                    existingRecord.AddressDistrictId = request.AddressDistrictId ?? existingRecord.AddressDistrictId;
+                    existingRecord.AddressCommuneId = request.AddressCommuneId ?? existingRecord.AddressCommuneId;
+
+                    existingRecord.ReferenceNumberOrig = request.ReferenceNumberOrig ?? existingRecord.ReferenceNumberOrig;
+                    existingRecord.ReferenceDateOrig = request.ReferenceDateOrig != null
+                        ? DateOnly.FromDateTime((DateTime)request.ReferenceDateOrig)
+                        : existingRecord.ReferenceDateOrig;
+
+                    existingRecord.IsOnlyBirthYear = request.IsOnlyBirthYear ?? existingRecord.IsOnlyBirthYear;
+                    existingRecord.TenBenhVien = request.TenBenhVien ?? existingRecord.TenBenhVien;
 
                     _db.ThongTinTheBHYT.Update(existingRecord);
                     await _db.SaveChangesAsync();
@@ -275,6 +375,7 @@ namespace TraCuuBHXH_BHYT.Service
                     // Thêm mới dữ liệu
                     var newRecord = new ThongTinTheBHYT
                     {
+                        Id = (long)request.Id,
                         UpdatedDate = request.UpdatedDate != null ? request.UpdatedDate : DateTime.Now,
                         CreatedDate = request.CreatedDate != null ? request.CreatedDate : DateTime.Now,
                         IDTheBHYT = request.IDTheBHYT != null ? (long)request.IDTheBHYT : 0,
@@ -294,7 +395,7 @@ namespace TraCuuBHXH_BHYT.Service
                         DaHetHan = request.DaHetHan,
                         Status = request.Status != null ? (byte)request.Status : (byte)0,
                         PhatHanh = request.PhatHanh != null ? (byte)(request.PhatHanh == true ? 1 : 0) : (byte)0,
-                        Type = request.Type,
+                        //Type = request.Type,
                         DaIn = request.DaIn,
                         NgayIn = request.NgayIn != null ? DateOnly.FromDateTime((DateTime)request.NgayIn) : null,
                         NguoiIn = request.UserPrintedId != null ? request.UserPrintedId.ToString() : null,
@@ -341,7 +442,7 @@ namespace TraCuuBHXH_BHYT.Service
                         ReferenceNumberOrig = request.ReferenceNumberOrig,
                         ReferenceDateOrig = request.ReferenceDateOrig != null ? DateOnly.FromDateTime((DateTime)request.ReferenceDateOrig) : null ,
                         IsOnlyBirthYear = request.IsOnlyBirthYear,
-                        FormattedUpdatedDate = request.UpdatedDate != null ? ((DateTime)request.UpdatedDate).ToString("dd/MM/yyyy HH:mm:ss") : DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
+                        // FormattedUpdatedDate = request.UpdatedDate.ToString("yyyyMM"),
                         TenBenhVien = request.TenBenhVien,
                     };
 
