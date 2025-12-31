@@ -7,6 +7,6 @@ namespace TraCuuBHXH_BHYT.Interface
     public interface ITraCuuBHXHService
     {
         Task<ResponseTraCuuBHXHVN> TraCuuBHXHQDAsync(RequestTraCuuBHXHVN request);
-        Task<ResponseTraCuuBHXHVN> ThemHoacCapNhatAsync(RequestTraCuuBHXHVN request);
+        Task<ResponseUpdateBHXHVN> ThemHoacCapNhatAsync(RequestUpdateBHXHVN request);
     }
 }

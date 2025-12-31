@@ -51,7 +51,7 @@ namespace TraCuuBHXH_BHYT.Controllers
         }
 
         [HttpPost("themHoacCapNhat")]
-        public async Task<IActionResult> ThemHoacCapNhatBHXH([FromBody] RequestTraCuuBHXHVN request, [FromHeader(Name = "Authorization")] string authorization)
+        public async Task<IActionResult> ThemHoacCapNhatBHXH([FromBody] RequestUpdateBHXHVN request, [FromHeader(Name = "Authorization")] string authorization)
         {
             if (string.IsNullOrEmpty(authorization)) return Unauthorized("Xác thực không hợp lệ");
             if (request == null) return BadRequest("Request không hợp lệ");

@@ -208,7 +208,7 @@ namespace TraCuuBHXH_BHYT.Service
             return 0;  // Đủ ngày
         }
 
-        public async Task<ResponseTraCuuBHXHVN> ThemHoacCapNhatAsync(RequestTraCuuBHXHVN request)
+        public async Task<ResponseUpdateBHXHVN> ThemHoacCapNhatAsync(RequestUpdateBHXHVN request)
         {
             try
             {
@@ -217,44 +217,32 @@ namespace TraCuuBHXH_BHYT.Service
                 // ============================
                 var missing = new List<string>();
 
-                if (string.IsNullOrWhiteSpace(request.type)) missing.Add("type");
-                if (string.IsNullOrWhiteSpace(request.soCccd)) missing.Add("soCccd");
-                if (string.IsNullOrWhiteSpace(request.hoTen)) missing.Add("hoTen");
-                if (string.IsNullOrWhiteSpace(request.ngaySinh)) missing.Add("ngaySinh");
+                if (string.IsNullOrWhiteSpace(request.SoCccd)) missing.Add("soCccd");
+                if (string.IsNullOrWhiteSpace(request.HoTen)) missing.Add("hoTen");
 
-                if (request.gioiTinh != Constant.Constant.GIOI_TINH_NU && request.gioiTinh != Constant.Constant.GIOI_TINH_NAM)
+                if (request.GioiTinh != Constant.Constant.GIOI_TINH_NU && request.GioiTinh != Constant.Constant.GIOI_TINH_NAM)
                     missing.Add("gioiTinh");
 
                 if (missing.Count > 0)
                 {
-                    return new ResponseTraCuuBHXHVN
+                    return new ResponseUpdateBHXHVN
                     {
                         maLoi = Constant.Constant.MA_LOI_THAT_BAI,
                         moTaLoi = $"Thiếu hoặc sai trường: {string.Join(", ", missing)}"
                     };
                 }
 
-                // type phải = BHYT
-                if (!string.Equals(request.type, Constant.Constant.TYPE_BHYT, StringComparison.OrdinalIgnoreCase))
-                {
-                    return new ResponseTraCuuBHXHVN
-                    {
-                        maLoi = Constant.Constant.MA_LOI_THAT_BAI,
-                        moTaLoi = "Loại yêu cầu không đúng"
-                    };
-                }
-
                 // ============================
                 // 2. Kiểm tra xem dữ liệu đã tồn tại chưa (dựa trên CCCD + HỌ tên + giới tính + ngày sinh)
                 // ============================
-                string gioiTinhInverted = request.gioiTinh == Constant.Constant.GIOI_TINH_NAM ? Constant.Constant.GIOI_TINH_NU : Constant.Constant.GIOI_TINH_NAM;
+                string gioiTinhInverted = request.GioiTinh == Constant.Constant.GIOI_TINH_NAM ? Constant.Constant.GIOI_TINH_NU : Constant.Constant.GIOI_TINH_NAM;
                 
                 var existingRecord = await _db.ThongTinTheBHYT
                     .FirstOrDefaultAsync(x =>
-                        x.SoCCCD.Trim() == request.soCccd.Trim() &&
-                        x.HoTen.Trim().ToUpper() == request.hoTen.Trim().ToUpper() &&
+                        x.SoCCCD.Trim() == request.SoCccd.Trim() &&
+                        x.HoTen.Trim().ToUpper() == request.HoTen.Trim().ToUpper() &&
                         x.GioiTinh == gioiTinhInverted &&
-                        x.NgaySinh.Trim() == request.ngaySinh.Trim());
+                        x.NgaySinh.Trim() == request.NgaySinh.Trim());
 
                 // ============================
                 // 3. Update hoặc Insert
@@ -262,14 +250,14 @@ namespace TraCuuBHXH_BHYT.Service
                 if (existingRecord != null)
                 {
                     // Cập nhật dữ liệu hiện có
-                   // existingRecord.MaTheBHYT = request.maTheBHXH ?? existingRecord.MaTheBHYT;
-                    existingRecord.MaSoBHXH = request.maSoBHXH ?? existingRecord.MaSoBHXH;
+                    existingRecord.MaTheBHYT = request.MaTheBHXH ?? existingRecord.MaTheBHYT;
+                    existingRecord.MaSoBHXH = request.MaSoBHXH ?? existingRecord.MaSoBHXH;
                     existingRecord.UpdatedDate = DateTime.Now;
 
                     _db.ThongTinTheBHYT.Update(existingRecord);
                     await _db.SaveChangesAsync();
 
-                    return new ResponseTraCuuBHXHVN
+                    return new ResponseUpdateBHXHVN
                     {
                         maLoi = Constant.Constant.MA_LOI_THANH_CONG,
                         moTaLoi = "Cập nhật dữ liệu thành công",
@@ -287,20 +275,80 @@ namespace TraCuuBHXH_BHYT.Service
                     // Thêm mới dữ liệu
                     var newRecord = new ThongTinTheBHYT
                     {
-                        SoCCCD = request.soCccd.Trim(),
-                        HoTen = request.hoTen.Trim(),
-                        NgaySinh = request.ngaySinh.Trim(),
+                        UpdatedDate = request.UpdatedDate != null ? request.UpdatedDate : DateTime.Now,
+                        CreatedDate = request.CreatedDate != null ? request.CreatedDate : DateTime.Now,
+                        IDTheBHYT = request.IDTheBHYT != null ? (long)request.IDTheBHYT : 0,
+                        IDDonVi = request.IDDonVi != null ? (long)request.IDDonVi : 0,
+                        IdDoiTuong = request.IDDoiTuong != null ? (short)request.IDDoiTuong : (short)0,
+                        MaCSKCB = request.IDBenhVien != null ? (short)request.IDBenhVien : (short)0,
+                        IDHSCN = request.IDHSCN != null ? (long)request.IDHSCN : 0,
+                        IDHangMucYTe = request.IDHangMucYTe != null ? (short)request.IDHangMucYTe : (short)0,
+                        IDYTeTinh = request.IDYTeTinh != null ? (short)request.IDYTeTinh : (short)0,
+                        IDHoTro = request.IDHoTro != null ? (short)request.IDHoTro : (short)0,
+                        IDYteDoiTuon = request.IDYteDoiTuong != null ? (short)request.IDYteDoiTuong : (short)0,
+                        UserId = request.UserId != null ? request.UserId.ToString() : null,
+                        MaSoBHXH = request.MaSoBHXH,
+                        MaTheBHYT = request.MiCardNum,
+                        TuNgay = request.TuNgay != null ? DateOnly.FromDateTime((DateTime)request.TuNgay) : null,
+                        DenNgay = request.DenNgay != null ? DateOnly.FromDateTime((DateTime)request.DenNgay) : null,
+                        DaHetHan = request.DaHetHan,
+                        Status = request.Status != null ? (byte)request.Status : (byte)0,
+                        PhatHanh = request.PhatHanh != null ? (byte)(request.PhatHanh == true ? 1 : 0) : (byte)0,
+                        Type = request.Type,
+                        DaIn = request.DaIn,
+                        NgayIn = request.NgayIn != null ? DateOnly.FromDateTime((DateTime)request.NgayIn) : null,
+                        NguoiIn = request.UserPrintedId != null ? request.UserPrintedId.ToString() : null,
+                        MaGiam = request.MaLoi,
+                        NgayGiam = request.NgayGiam != null ? DateOnly.FromDateTime((DateTime)request.NgayGiam) : null,
+                        ThuHoi = request.ThuHoi,
+                        NgayThuHoi = request.NgayGiam != null ? DateOnly.FromDateTime((DateTime)request.NgayGiam) : null,
+                        NguoiThuHoi = request.UserId != null ? request.UserId.ToString()
+                        : null,
+                        SoThangLienTuc = request.SoThangLienTuc != null ? (int)request.SoThangLienTuc : 0,
+                        Ngay5NamLienTuc = request.Ngay5NamLienTuc != null ? DateOnly.FromDateTime((DateTime)request.Ngay5NamLienTuc) : null,
+                        IsLockPrint = request.IsLockPrint,
+                        UserLockPrintId = request.UserLockPrintId != null ? request.UserLockPrintId.ToString() : null,
+                        DiaChi = request.DiaChi,
+                        MaTinhDangSong = request.MaTinhDangSong,
+                        SoCCCD = request.SoCccd.Trim(),
+                        HoTen = request.HoTen.Trim(),
+                        NgaySinh = request.NgaySinh.Trim(),
                         GioiTinh = gioiTinhInverted,
-                      //  MaTheBHYT = request.maTheBHXH,
-                        MaSoBHXH = request.maSoBHXH,
-                        UpdatedDate = DateTime.Now,
-                        IdDoiTuong = 1  // Giá trị mặc định, có thể điều chỉnh theo yêu cầu
+                        NgayPhatHanh = request.NgayPhatHanh != null ? DateOnly.FromDateTime((DateTime)request.NgayPhatHanh) : null, 
+                        MaLoi = request.MaLoi,
+                        GhiChu = request.GhiChu,
+                        TrangThaiPheDuyet = request.TrangThaiPheDuyet,
+                        NgayPheDuyet = request.NgayPheDuyet != null ? DateOnly.FromDateTime((DateTime)request.NgayPheDuyet) : null ,
+                        ApproveMoveDate = request.ApproveMoveDate != null ? DateOnly.FromDateTime((DateTime)request.ApproveMoveDate) : null,
+                        ApproveUserId = request.ApproveUserId,
+                        ApproveMoveStatus = request.ApproveMoveStatus,
+                        ApproveMoveUserId = request.ApproveMoveUserId != null ? request.ApproveMoveUserId.ToString() : null,
+                        RenewalKey = request.RenewalKey,
+                        IsChangedInfo = request.IsChangedInfo,
+                        MiCardOldId = request.MiCardOldId,
+                        ArriveDocumentType = request.ArriveDocumentType,
+                        ArriveDocumentCode = request.ArriveDocumentCode,
+                        IsDebt = request.IsDebt,
+                        DebtDate = request.DebtDate != null ? DateOnly.FromDateTime((DateTime)request.DebtDate) : null ,
+                        DebtUserId = request.DebtUserId,
+                        ReferenceNumber = request.ReferenceNumber,
+                        ArriveNumber = request.ArriveNumber,
+                        PersonalProfileCorrectionId = request.PersonalProfileCorrectionId != null ? (long)request.PersonalProfileCorrectionId : 0,
+                        IsSynVss = request.IsSynVss,
+                        AddressProvinceId = request.AddressProvinceId,
+                        AddressDistrictId = request.AddressDistrictId,
+                        AddressCommuneId = request.AddressCommuneId,
+                        ReferenceNumberOrig = request.ReferenceNumberOrig,
+                        ReferenceDateOrig = request.ReferenceDateOrig != null ? DateOnly.FromDateTime((DateTime)request.ReferenceDateOrig) : null ,
+                        IsOnlyBirthYear = request.IsOnlyBirthYear,
+                        FormattedUpdatedDate = request.UpdatedDate != null ? ((DateTime)request.UpdatedDate).ToString("dd/MM/yyyy HH:mm:ss") : DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
+                        TenBenhVien = request.TenBenhVien,
                     };
 
                     _db.ThongTinTheBHYT.Add(newRecord);
                     await _db.SaveChangesAsync();
 
-                    return new ResponseTraCuuBHXHVN
+                    return new ResponseUpdateBHXHVN
                     {
                         maLoi = Constant.Constant.MA_LOI_THANH_CONG,
                         moTaLoi = "Thêm dữ liệu thành công",
@@ -308,7 +356,7 @@ namespace TraCuuBHXH_BHYT.Service
                         hoTen = newRecord.HoTen,
                         ngaySinh = newRecord.NgaySinh,
                         gioiTinh = newRecord.GioiTinh == Constant.Constant.GIOI_TINH_NU ? Constant.Constant.GIOI_TINH_NAM : Constant.Constant.GIOI_TINH_NU,
-                        maThe = newRecord.MaTheBHYT,
+                        maThe = newRecord.MaSoBHXH,
                         nguoiGui = Constant.Constant.NGUOI_GUI,
                         ngayCapNhat = newRecord.UpdatedDate
                     };
@@ -316,7 +364,7 @@ namespace TraCuuBHXH_BHYT.Service
             }
             catch (DbUpdateException dbEx)
             {
-                return new ResponseTraCuuBHXHVN
+                return new ResponseUpdateBHXHVN
                 {
                     maLoi = Constant.Constant.MA_LOI_THAT_BAI,
                     moTaLoi = "Lỗi kết nối cơ sở dữ liệu. Vui lòng thử lại sau."
@@ -324,7 +372,7 @@ namespace TraCuuBHXH_BHYT.Service
             }
             catch (Exception ex)
             {
-                return new ResponseTraCuuBHXHVN
+                return new ResponseUpdateBHXHVN
                 {
                     maLoi = Constant.Constant.MA_LOI_THAT_BAI,
                     moTaLoi = "Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau."
