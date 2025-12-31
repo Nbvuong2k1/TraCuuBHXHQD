@@ -67,11 +67,12 @@ namespace TraCuuBHXH_BHYT.Service
                 // 2. Bắt đầu truy vấn
                 // ============================
                 var query = _db.ThongTinTheBHYT
-                    .Join(_db.DoiTuong,
-                        thongTin => thongTin.IdDoiTuong,
-                        doiTuong => doiTuong.Id,
-                        (thongTin, doiTuong) => new { ThongTin = thongTin, DoiTuong = doiTuong })
+                    .Select(thongTin => new
+                    {
+                        ThongTin = thongTin
+                    })
                     .AsQueryable();
+
 
                 // So CCCD
                 query = query.Where(x => x.ThongTin.SoCCCD.Trim() == request.soCccd.Trim());
@@ -145,11 +146,11 @@ namespace TraCuuBHXH_BHYT.Service
                 // 5. Kiểm tra MaDT để quyết định có lấy địa chỉ hay không
                 // ============================
                 string? diaChi = null;
-                string? maDT = item.DoiTuong.MaDT?.Trim().ToUpper();
-                if (Constant.Constant.MA_DT_DUOC_PHEP_LAY_DIA_CHI.Contains(maDT))
-                {
-                    diaChi = item.ThongTin.DiaChi;
-                }
+                //string? maDT = item.DoiTuong.MaDT?.Trim().ToUpper();
+                //if (Constant.Constant.MA_DT_DUOC_PHEP_LAY_DIA_CHI.Contains(maDT))
+                //{
+                diaChi = item.ThongTin.DiaChi;
+                //}
 
                 // ============================
                 // 6. Trả về kết quả
@@ -252,16 +253,9 @@ namespace TraCuuBHXH_BHYT.Service
                     existingRecord.UpdatedDate = DateTime.Now;
 
                     existingRecord.IDTheBHYT = request.IDTheBHYT ?? existingRecord.IDTheBHYT;
-                    existingRecord.IDDonVi = request.IDDonVi ?? existingRecord.IDDonVi;
-                    existingRecord.IdDoiTuong = request.IDDoiTuong != null ? (short)request.IDDoiTuong : existingRecord.IdDoiTuong;
-                    existingRecord.MaCSKCB = request.IDBenhVien != null ? (short)request.IDBenhVien : existingRecord.MaCSKCB;
-                    existingRecord.IDHSCN = request.IDHSCN ?? existingRecord.IDHSCN;
-                    existingRecord.IDHangMucYTe = request.IDHangMucYTe != null ? (short)request.IDHangMucYTe : existingRecord.IDHangMucYTe;
-                    existingRecord.IDYTeTinh = request.IDYTeTinh != null ? (short)request.IDYTeTinh : existingRecord.IDYTeTinh;
-                    existingRecord.IDHoTro = request.IDHoTro != null ? (short)request.IDHoTro : existingRecord.IDHoTro;
-                    existingRecord.IDYteDoiTuon = request.IDYteDoiTuong != null ? (short)request.IDYteDoiTuong : existingRecord.IDYteDoiTuon;
-
-                    existingRecord.UserId = request.UserId?.ToString() ?? existingRecord.UserId;
+                    //existingRecord.IDDonVi = request.IDDonVi ?? existingRecord.IDDonVi;
+                    //existingRecord.IdDoiTuong = request.IDDoiTuong != null ? (short)request.IDDoiTuong : existingRecord.IdDoiTuong;
+                    existingRecord.MaCSKCB = request.IDBenhVien.ToString();
                     existingRecord.MaSoBHXH = request.MaSoBHXH ?? existingRecord.MaSoBHXH;
                     existingRecord.MaTheBHYT = request.MiCardNum ?? existingRecord.MaTheBHYT;
 
@@ -273,83 +267,19 @@ namespace TraCuuBHXH_BHYT.Service
                         ? DateOnly.FromDateTime((DateTime)request.DenNgay)
                         : existingRecord.DenNgay;
 
-                    existingRecord.DaHetHan = request.DaHetHan ?? existingRecord.DaHetHan;
                     existingRecord.Status = request.Status != null ? (byte)request.Status : existingRecord.Status;
-                    existingRecord.PhatHanh = request.PhatHanh != null ? (byte)(request.PhatHanh == true ? 1 : 0) : existingRecord.PhatHanh;
 
-                    existingRecord.DaIn = request.DaIn ?? existingRecord.DaIn;
-                    existingRecord.NgayIn = request.NgayIn != null ? DateOnly.FromDateTime((DateTime)request.NgayIn) : existingRecord.NgayIn;
-                    existingRecord.NguoiIn = request.UserPrintedId?.ToString() ?? existingRecord.NguoiIn;
-
-                    existingRecord.MaGiam = request.MaLoi ?? existingRecord.MaGiam;
-                    existingRecord.NgayGiam = request.NgayGiam != null ? DateOnly.FromDateTime((DateTime)request.NgayGiam) : existingRecord.NgayGiam;
-
-                    existingRecord.ThuHoi = request.ThuHoi ?? existingRecord.ThuHoi;
-                    existingRecord.NgayThuHoi = request.NgayThuHoi != null ? DateOnly.FromDateTime((DateTime)request.NgayThuHoi) : existingRecord.NgayThuHoi;
-                    existingRecord.NguoiThuHoi = request.UserId?.ToString() ?? existingRecord.NguoiThuHoi;
-
-                    existingRecord.SoThangLienTuc = request.SoThangLienTuc ?? existingRecord.SoThangLienTuc;
                     existingRecord.Ngay5NamLienTuc = request.Ngay5NamLienTuc != null
                         ? DateOnly.FromDateTime((DateTime)request.Ngay5NamLienTuc)
                         : existingRecord.Ngay5NamLienTuc;
 
-                    existingRecord.IsLockPrint = request.IsLockPrint ?? existingRecord.IsLockPrint;
-                    existingRecord.UserLockPrintId = request.UserLockPrintId?.ToString() ?? existingRecord.UserLockPrintId;
 
                     existingRecord.DiaChi = request.DiaChi ?? existingRecord.DiaChi;
-                    existingRecord.MaTinhDangSong = request.MaTinhDangSong ?? existingRecord.MaTinhDangSong;
 
                     existingRecord.SoCCCD = request.SoCccd?.Trim() ?? existingRecord.SoCCCD;
                     existingRecord.HoTen = request.HoTen?.Trim() ?? existingRecord.HoTen;
                     existingRecord.NgaySinh = request.NgaySinh?.Trim() ?? existingRecord.NgaySinh;
                     existingRecord.GioiTinh = gioiTinhInverted;
-
-                    existingRecord.NgayPhatHanh = request.NgayPhatHanh != null
-                        ? DateOnly.FromDateTime((DateTime)request.NgayPhatHanh)
-                        : existingRecord.NgayPhatHanh;
-
-                    existingRecord.GhiChu = request.GhiChu ?? existingRecord.GhiChu;
-                    existingRecord.TrangThaiPheDuyet = request.TrangThaiPheDuyet ?? existingRecord.TrangThaiPheDuyet;
-                    existingRecord.NgayPheDuyet = request.NgayPheDuyet != null
-                        ? DateOnly.FromDateTime((DateTime)request.NgayPheDuyet)
-                        : existingRecord.NgayPheDuyet;
-
-                    existingRecord.ApproveMoveDate = request.ApproveMoveDate != null
-                        ? DateOnly.FromDateTime((DateTime)request.ApproveMoveDate)
-                        : existingRecord.ApproveMoveDate;
-
-                    existingRecord.ApproveUserId = request.ApproveUserId ?? existingRecord.ApproveUserId;
-                    existingRecord.ApproveMoveStatus = request.ApproveMoveStatus ?? existingRecord.ApproveMoveStatus;
-                    existingRecord.ApproveMoveUserId = request.ApproveMoveUserId?.ToString() ?? existingRecord.ApproveMoveUserId;
-
-                    existingRecord.RenewalKey = request.RenewalKey ?? existingRecord.RenewalKey;
-                    existingRecord.IsChangedInfo = request.IsChangedInfo ?? existingRecord.IsChangedInfo;
-                    existingRecord.MiCardOldId = request.MiCardOldId ?? existingRecord.MiCardOldId;
-
-                    existingRecord.ArriveDocumentType = request.ArriveDocumentType ?? existingRecord.ArriveDocumentType;
-                    existingRecord.ArriveDocumentCode = request.ArriveDocumentCode ?? existingRecord.ArriveDocumentCode;
-
-                    existingRecord.IsDebt = request.IsDebt ?? existingRecord.IsDebt;
-                    existingRecord.DebtDate = request.DebtDate != null
-                        ? DateOnly.FromDateTime((DateTime)request.DebtDate)
-                        : existingRecord.DebtDate;
-
-                    existingRecord.DebtUserId = request.DebtUserId ?? existingRecord.DebtUserId;
-                    existingRecord.ReferenceNumber = request.ReferenceNumber ?? existingRecord.ReferenceNumber;
-                    existingRecord.ArriveNumber = request.ArriveNumber ?? existingRecord.ArriveNumber;
-
-                    existingRecord.PersonalProfileCorrectionId =
-                        request.PersonalProfileCorrectionId ?? existingRecord.PersonalProfileCorrectionId;
-
-                    existingRecord.IsSynVss = request.IsSynVss ?? existingRecord.IsSynVss;
-                    existingRecord.AddressProvinceId = request.AddressProvinceId ?? existingRecord.AddressProvinceId;
-                    existingRecord.AddressDistrictId = request.AddressDistrictId ?? existingRecord.AddressDistrictId;
-                    existingRecord.AddressCommuneId = request.AddressCommuneId ?? existingRecord.AddressCommuneId;
-
-                    existingRecord.ReferenceNumberOrig = request.ReferenceNumberOrig ?? existingRecord.ReferenceNumberOrig;
-                    existingRecord.ReferenceDateOrig = request.ReferenceDateOrig != null
-                        ? DateOnly.FromDateTime((DateTime)request.ReferenceDateOrig)
-                        : existingRecord.ReferenceDateOrig;
 
                     existingRecord.IsOnlyBirthYear = request.IsOnlyBirthYear ?? existingRecord.IsOnlyBirthYear;
                     existingRecord.TenBenhVien = request.TenBenhVien ?? existingRecord.TenBenhVien;
@@ -379,70 +309,20 @@ namespace TraCuuBHXH_BHYT.Service
                         UpdatedDate = request.UpdatedDate != null ? request.UpdatedDate : DateTime.Now,
                         CreatedDate = request.CreatedDate != null ? request.CreatedDate : DateTime.Now,
                         IDTheBHYT = request.IDTheBHYT != null ? (long)request.IDTheBHYT : 0,
-                        IDDonVi = request.IDDonVi != null ? (long)request.IDDonVi : 0,
-                        IdDoiTuong = request.IDDoiTuong != null ? (short)request.IDDoiTuong : (short)0,
-                        MaCSKCB = request.IDBenhVien != null ? (short)request.IDBenhVien : (short)0,
-                        IDHSCN = request.IDHSCN != null ? (long)request.IDHSCN : 0,
-                        IDHangMucYTe = request.IDHangMucYTe != null ? (short)request.IDHangMucYTe : (short)0,
-                        IDYTeTinh = request.IDYTeTinh != null ? (short)request.IDYTeTinh : (short)0,
-                        IDHoTro = request.IDHoTro != null ? (short)request.IDHoTro : (short)0,
-                        IDYteDoiTuon = request.IDYteDoiTuong != null ? (short)request.IDYteDoiTuong : (short)0,
-                        UserId = request.UserId != null ? request.UserId.ToString() : null,
+                        MaCSKCB = request.IDBenhVien.ToString(),
+                       
                         MaSoBHXH = request.MaSoBHXH,
                         MaTheBHYT = request.MiCardNum,
                         TuNgay = request.TuNgay != null ? DateOnly.FromDateTime((DateTime)request.TuNgay) : null,
                         DenNgay = request.DenNgay != null ? DateOnly.FromDateTime((DateTime)request.DenNgay) : null,
-                        DaHetHan = request.DaHetHan,
                         Status = request.Status != null ? (byte)request.Status : (byte)0,
-                        PhatHanh = request.PhatHanh != null ? (byte)(request.PhatHanh == true ? 1 : 0) : (byte)0,
-                        //Type = request.Type,
-                        DaIn = request.DaIn,
-                        NgayIn = request.NgayIn != null ? DateOnly.FromDateTime((DateTime)request.NgayIn) : null,
-                        NguoiIn = request.UserPrintedId != null ? request.UserPrintedId.ToString() : null,
-                        MaGiam = request.MaLoi,
-                        NgayGiam = request.NgayGiam != null ? DateOnly.FromDateTime((DateTime)request.NgayGiam) : null,
-                        ThuHoi = request.ThuHoi,
-                        NgayThuHoi = request.NgayGiam != null ? DateOnly.FromDateTime((DateTime)request.NgayGiam) : null,
-                        NguoiThuHoi = request.UserId != null ? request.UserId.ToString()
-                        : null,
-                        SoThangLienTuc = request.SoThangLienTuc != null ? (int)request.SoThangLienTuc : 0,
                         Ngay5NamLienTuc = request.Ngay5NamLienTuc != null ? DateOnly.FromDateTime((DateTime)request.Ngay5NamLienTuc) : null,
-                        IsLockPrint = request.IsLockPrint,
-                        UserLockPrintId = request.UserLockPrintId != null ? request.UserLockPrintId.ToString() : null,
                         DiaChi = request.DiaChi,
-                        MaTinhDangSong = request.MaTinhDangSong,
                         SoCCCD = request.SoCccd.Trim(),
                         HoTen = request.HoTen.Trim(),
                         NgaySinh = request.NgaySinh.Trim(),
                         GioiTinh = gioiTinhInverted,
-                        NgayPhatHanh = request.NgayPhatHanh != null ? DateOnly.FromDateTime((DateTime)request.NgayPhatHanh) : null, 
-                        MaLoi = request.MaLoi,
-                        GhiChu = request.GhiChu,
-                        TrangThaiPheDuyet = request.TrangThaiPheDuyet,
-                        NgayPheDuyet = request.NgayPheDuyet != null ? DateOnly.FromDateTime((DateTime)request.NgayPheDuyet) : null ,
-                        ApproveMoveDate = request.ApproveMoveDate != null ? DateOnly.FromDateTime((DateTime)request.ApproveMoveDate) : null,
-                        ApproveUserId = request.ApproveUserId,
-                        ApproveMoveStatus = request.ApproveMoveStatus,
-                        ApproveMoveUserId = request.ApproveMoveUserId != null ? request.ApproveMoveUserId.ToString() : null,
-                        RenewalKey = request.RenewalKey,
-                        IsChangedInfo = request.IsChangedInfo,
-                        MiCardOldId = request.MiCardOldId,
-                        ArriveDocumentType = request.ArriveDocumentType,
-                        ArriveDocumentCode = request.ArriveDocumentCode,
-                        IsDebt = request.IsDebt,
-                        DebtDate = request.DebtDate != null ? DateOnly.FromDateTime((DateTime)request.DebtDate) : null ,
-                        DebtUserId = request.DebtUserId,
-                        ReferenceNumber = request.ReferenceNumber,
-                        ArriveNumber = request.ArriveNumber,
-                        PersonalProfileCorrectionId = request.PersonalProfileCorrectionId != null ? (long)request.PersonalProfileCorrectionId : 0,
-                        IsSynVss = request.IsSynVss,
-                        AddressProvinceId = request.AddressProvinceId,
-                        AddressDistrictId = request.AddressDistrictId,
-                        AddressCommuneId = request.AddressCommuneId,
-                        ReferenceNumberOrig = request.ReferenceNumberOrig,
-                        ReferenceDateOrig = request.ReferenceDateOrig != null ? DateOnly.FromDateTime((DateTime)request.ReferenceDateOrig) : null ,
                         IsOnlyBirthYear = request.IsOnlyBirthYear,
-                        // FormattedUpdatedDate = request.UpdatedDate.ToString("yyyyMM"),
                         TenBenhVien = request.TenBenhVien,
                     };
 

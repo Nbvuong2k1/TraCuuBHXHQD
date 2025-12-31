@@ -38,7 +38,7 @@ namespace TraCuuBHXH_BHYT.Request
         public long? IDHangMucYTe { get; set; }
         public long? IDYteDoiTuong { get; set; }
         public long? IDYTeTinh { get; set; }
-        public long? IDBenhVien { get; set; }
+        public string? IDBenhVien { get; set; }
 
         public string? TenBenhVien { get; set; }
 

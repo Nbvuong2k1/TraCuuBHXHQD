@@ -10,7 +10,7 @@
         public string? tuNgay { get; set; }
         public string? denNgay { get; set; }
         public string? ngay5NamLienTuc { get; set; }
-        public short? maCSKCB { get; set; }
+        public string? maCSKCB { get; set; }
         public string? tenBenhVien { get; set; }
         public string? diaChi { get; set; }
         public string? maCQBH { get; set; }
