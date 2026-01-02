@@ -36,6 +36,35 @@ namespace TraCuuBHXH_BHYT.Service
                 return (false, "Token không hợp lệ");
             }
 
+            // Kiểm tra token với DB (Key = "Token")
+            try
+            {
+                // Lưu ý: ValidateBearerToken hiện tại là đồng bộ (synchronous),
+                // nhưng truy cập DB nên dùng async. Tuy nhiên để giữ chữ ký hàm, 
+                // ta dùng .GetAwaiter().GetResult() hoặc chuyển hàm sang async nếu interface cho phép.
+                // Ở đây ta dùng cách đồng bộ để tránh sửa interface ngay lập tức, 
+                // nhưng tốt nhất nên refactor interface sang async Task.
+                
+                var tokenParam = _db.DMParameter
+                    .AsNoTracking()
+                    .FirstOrDefault(x => x.Key == "Token" && x.IsActive == true);
+
+                if (tokenParam == null || string.IsNullOrWhiteSpace(tokenParam.Value))
+                {
+                    // Nếu chưa có token nào được sinh ra trong DB thì coi như token client gửi lên là không hợp lệ
+                    return (false, "Hệ thống chưa có token hợp lệ để đối chiếu");
+                }
+
+                if (!string.Equals(token, tokenParam.Value.Trim(), StringComparison.Ordinal))
+                {
+                    return (false, "Token không khớp với hệ thống");
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Lỗi kiểm tra token trong DB: {ex.Message}");
+            }
+
             try
             {
                 var handler = new JwtSecurityTokenHandler();
@@ -132,7 +161,7 @@ namespace TraCuuBHXH_BHYT.Service
                     new Claim("scope", "am_application_scope default")
                 };
 
-                var expires = DateTime.UtcNow.AddSeconds(3600);
+                var expires = DateTime.UtcNow.AddDays(1);
                 var jwt = new JwtSecurityToken(
                     issuer: "TraCuuBHXH_BHYT",
                     audience: "TraCuuBHXH_BHYT",
@@ -143,12 +172,29 @@ namespace TraCuuBHXH_BHYT.Service
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(jwt);
 
+                var tokenParam = await _db.DMParameter.FirstOrDefaultAsync(x => x.Key == "Token");
+                if (tokenParam != null)
+                {
+                    tokenParam.Value = tokenString;
+                    _db.DMParameter.Update(tokenParam);
+                }
+                else
+                {
+                    await _db.DMParameter.AddAsync(new TraCuuBHXH_BHYT.Entities.DMParameterEntity
+                    {
+                        Key = "Token",
+                        Value = tokenString,
+                        IsActive = true
+                    });
+                }
+                await _db.SaveChangesAsync();
+
                 return new TokenResult
                 {
                     access_token = tokenString,
                     scope = "am_application_scope default",
                     token_type = "Bearer",
-                    expires_in = 3600
+                    expires_in = 86400
                 };
             }
             catch (Exception)
