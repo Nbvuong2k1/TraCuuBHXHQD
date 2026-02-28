@@ -27,7 +27,10 @@ namespace TraCuuBHXH_BHYT.Configuration
             builder.Property(x => x.DiaChi).HasMaxLength(300).HasColumnName("DiaChi");
             //builder.Property(x => x.IdDoiTuong).HasColumnName("IDDoiTuong");
             builder.Property(x => x.UpdatedDate).HasColumnName("UpdatedDate");
+            builder.Property(x => x.CreatedDate).HasColumnName("CreatedDate");
             builder.Property(x => x.MaKCB).HasColumnName("MiCardNumPrefix");
+            builder.Property(x => x.IDDonVi).HasColumnName("IDDonVi");
+            builder.Property(x => x.IdDoiTuong).HasColumnName("IdDoiTuong");
 
             // Cấu hình Foreign Key relationship với bảng DoiTuong
             //builder.HasOne<DoituongEntity>()

@@ -9,9 +9,9 @@ namespace TraCuuBHXH_BHYT.Entities
         public DateTime UpdatedDate { get; set; }
 
         public long IDTheBHYT { get; set; }
-        //public long IDDonVi { get; set; }
+        public long IDDonVi { get; set; }
 
-        //public short IdDoiTuong { get; set; }
+        public short IdDoiTuong { get; set; }
 
         public string? MaCSKCB { get; set; }   // MaCSKCB
         //public long? IDHSCN { get; set; }
@@ -110,6 +110,7 @@ namespace TraCuuBHXH_BHYT.Entities
         //public string? SiBookNumOld { get; set; }
 
         public string? TenBenhVien { get; set; }
+     //   public string? MiCardNumPrefix { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public string? MaKCB { get; set; }

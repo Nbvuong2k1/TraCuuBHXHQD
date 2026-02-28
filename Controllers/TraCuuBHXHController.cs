@@ -51,17 +51,17 @@ namespace TraCuuBHXH_BHYT.Controllers
         }
 
         [HttpPost("themHoacCapNhat")]
-        public async Task<IActionResult> ThemHoacCapNhatBHXH([FromBody] RequestUpdateBHXHVN request, [FromHeader(Name = "Authorization")] string authorization)
+        public async Task<IActionResult> ThemHoacCapNhatBHXH([FromBody] RequestUpdateBHXHVN request)
         {
-            if (string.IsNullOrEmpty(authorization)) return Unauthorized("Xác thực không hợp lệ");
-            if (request == null) return BadRequest("Request không hợp lệ");
+            //if (string.IsNullOrEmpty(authorization)) return Unauthorized("Xác thực không hợp lệ");
+            //if (request == null) return BadRequest("Request không hợp lệ");
 
-            // Validate Bearer token
-            var tokenValidationResult = _tokenValidationService.ValidateBearerToken(authorization);
-            if (!tokenValidationResult.IsValid)
-            {
-                return Unauthorized(tokenValidationResult.ErrorMessage);
-            }
+            //// Validate Bearer token
+            //var tokenValidationResult = _tokenValidationService.ValidateBearerToken(authorization);
+            //if (!tokenValidationResult.IsValid)
+            //{
+            //    return Unauthorized(tokenValidationResult.ErrorMessage);
+            //}
 
             var result = await _serviceTraCuuBHXH.ThemHoacCapNhatAsync(request);
 
@@ -125,6 +125,21 @@ namespace TraCuuBHXH_BHYT.Controllers
             {
                 return StatusCode(500, "Lỗi hệ thống");
             }
+        }
+
+        [HttpPost("SearchLog")]
+        public async Task<IActionResult> SearchLog([FromHeader(Name = "Role")] string role, [FromBody] RequestSearchLog request)
+        {
+            var result = await _serviceTraCuuBHXH.SearchLogTraCuu(role,request);
+            if(result.Total == -1)
+            {
+                return BadRequest(new
+                {
+                    total = result.Total,
+                    moTaLoi = result.Message
+                });
+            }    
+            return Ok(result);
         }
     }
 }

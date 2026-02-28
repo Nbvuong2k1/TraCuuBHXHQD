@@ -29,23 +29,31 @@ namespace TraCuuBHXH_BHYT.Service
 
         public async Task<ResponseTraCuuBHXHVN> TraCuuBHXHQDAsync(RequestTraCuuBHXHVN request)
         {
+            RequestSaveLog log = new RequestSaveLog();
             try
             {
+                log.Type = request.type;
+                log.MaTraCuu = request.maTraCuu;
+                log.HoTenTraCuu = request.hoTen;
+                log.NgaySinhTraCuu = request.ngaySinh;
+                log.GioiTinhTraCuu = request.gioiTinh;
+                log.ThoiGianTraCuu = DateTime.Now;
+                
+                
                 // ============================
                 // 1. Validate bắt buộc
                 // ============================
                 var missing = new List<string>();
 
                 if (string.IsNullOrWhiteSpace(request.type)) missing.Add("type");
-                if (string.IsNullOrWhiteSpace(request.soCccd)) missing.Add("soCccd");
+                if (string.IsNullOrWhiteSpace(request.maTraCuu)) missing.Add("maTraCuu");
                 if (string.IsNullOrWhiteSpace(request.hoTen)) missing.Add("hoTen");
                 if (string.IsNullOrWhiteSpace(request.ngaySinh)) missing.Add("ngaySinh");
 
-                if (request.gioiTinh != Constant.Constant.GIOI_TINH_NU && request.gioiTinh != Constant.Constant.GIOI_TINH_NAM)
-                    missing.Add("gioiTinh");
-
                 if (missing.Count > 0)
                 {
+                    log.KetQua = 0;
+                    await TrySaveLogAsync(log);
                     return new ResponseTraCuuBHXHVN
                     {
                         maLoi = Constant.Constant.MA_LOI_THAT_BAI,
@@ -56,6 +64,8 @@ namespace TraCuuBHXH_BHYT.Service
                 // type phải = BHYT
                 if (!string.Equals(request.type, Constant.Constant.TYPE_BHYT, StringComparison.OrdinalIgnoreCase))
                 {
+                    log.KetQua = 0;
+                    await TrySaveLogAsync(log);
                     return new ResponseTraCuuBHXHVN
                     {
                         maLoi = Constant.Constant.MA_LOI_THAT_BAI,
@@ -63,6 +73,16 @@ namespace TraCuuBHXH_BHYT.Service
                     };
                 }
 
+                if(!string.IsNullOrEmpty(request.maTraCuu) && request.maTraCuu.Length != 10 && request.maTraCuu.Length != 12 && request.maTraCuu.Length != 15)
+                {
+                    log.KetQua = 0;
+                    await TrySaveLogAsync(log);
+                    return new ResponseTraCuuBHXHVN
+                    {
+                        maLoi = Constant.Constant.MA_LOI_THAT_BAI,
+                        moTaLoi = "maTraCuu không đúng định dạng"
+                    };
+                }    
                 // ============================
                 // 2. Bắt đầu truy vấn
                 // ============================
@@ -73,16 +93,38 @@ namespace TraCuuBHXH_BHYT.Service
                     })
                     .AsQueryable();
 
+                // So CCCD với maTraCuu (12)
+                if (request.maTraCuu.Length == 12)query = query.Where(x => x.ThongTin.SoCCCD.Trim() == request.maTraCuu.Trim());
 
-                // So CCCD
-                query = query.Where(x => x.ThongTin.SoCCCD.Trim() == request.soCccd.Trim());
+                // So MASOBHXH với maTraCuu (10)
+                if (request.maTraCuu.Length == 10) query = query.Where(x => x.ThongTin.MaSoBHXH.Trim() == request.maTraCuu.Trim());
+
+                // So Mathe với maTraCuu (15)
+                if (request.maTraCuu.Length == 15) query = query.Where(x => x.ThongTin.MaTheBHYT.Trim() == request.maTraCuu.Trim());
 
                 // So tên (không phân biệt hoa thường)
                 query = query.Where(x => x.ThongTin.HoTen.Trim().ToUpper() == request.hoTen.Trim().ToUpper());
 
                 // So giới tính
-                string gioitinh = request.gioiTinh == Constant.Constant.GIOI_TINH_NAM ? Constant.Constant.GIOI_TINH_NU : Constant.Constant.GIOI_TINH_NAM;
-                query = query.Where(x => x.ThongTin.GioiTinh == gioitinh);
+                if (!string.IsNullOrEmpty(request.gioiTinh))
+                {
+                    if (request.gioiTinh.Trim() == "1" || request.gioiTinh.Trim() == "0")
+                    {
+                        string gioitinh = request.gioiTinh == Constant.Constant.GIOI_TINH_NAM ? Constant.Constant.GIOI_TINH_NU : Constant.Constant.GIOI_TINH_NAM;
+                        query = query.Where(x => x.ThongTin.GioiTinh == gioitinh);
+                    }
+                    else
+                    {
+                        log.KetQua = 0;
+                        await TrySaveLogAsync(log);
+                        return new ResponseTraCuuBHXHVN
+                        {
+                            maLoi = Constant.Constant.MA_LOI_THAT_BAI,
+                            moTaLoi = "gioiTinh không đúng định dạng"
+                        };
+                    }
+                     
+                }
 
                 // So ngày sinh
                 if (request.ngaySinh.Trim().Length == Constant.Constant.DO_DAI_NGAY_SINH_NAM)
@@ -97,20 +139,16 @@ namespace TraCuuBHXH_BHYT.Service
                 {
                     query = query.Where(x => x.ThongTin.NgaySinh.Trim() == request.ngaySinh.Trim());
                 }
-                else return new ResponseTraCuuBHXHVN
+                else
                 {
-                    maLoi = Constant.Constant.MA_LOI_THAT_BAI,
-                    moTaLoi = "Ngày sinh không đúng định dạng"
-                };
-
-                //  query = query.Where(x => Convert.ToDateTime(x.NgaySinh) == dob);
-
-                // Nếu có mã số BHXH thì thêm điều kiện
-                if (!string.IsNullOrWhiteSpace(request.maSoBHXH))
-                {
-                    query = query.Where(x => x.ThongTin.MaSoBHXH == request.maSoBHXH.Trim());
+                    log.KetQua = 0;
+                    await TrySaveLogAsync(log);
+                    return new ResponseTraCuuBHXHVN
+                    {
+                        maLoi = Constant.Constant.MA_LOI_THAT_BAI,
+                        moTaLoi = "ngaySinh không đúng định dạng"
+                    };
                 }
-
                 // ============================
                 // 3. Lấy dữ liệu (Order by Id desc để lấy bản ghi mới nhất nếu có nhiều bản ghi)
                 // ============================
@@ -118,6 +156,8 @@ namespace TraCuuBHXH_BHYT.Service
 
                 if (item == null)
                 {
+                    log.KetQua = 0;
+                    await TrySaveLogAsync(log);
                     return new ResponseTraCuuBHXHVN
                     {
                         maLoi = Constant.Constant.MA_LOI_THAT_BAI,
@@ -155,6 +195,8 @@ namespace TraCuuBHXH_BHYT.Service
                 // ============================
                 // 6. Trả về kết quả
                 // ============================
+                log.KetQua = item.ThongTin.Id;
+                await TrySaveLogAsync(log);
                 return new ResponseTraCuuBHXHVN
                 {
                     soCCCD = item.ThongTin.SoCCCD,
@@ -162,6 +204,7 @@ namespace TraCuuBHXH_BHYT.Service
                     ngaySinh = item.ThongTin.NgaySinh,
                     gioiTinh = item.ThongTin.GioiTinh == Constant.Constant.GIOI_TINH_NU ? Constant.Constant.GIOI_TINH_NAM : Constant.Constant.GIOI_TINH_NU,
                     maThe = item.ThongTin.MaTheBHYT,
+                    maSoBhxh = item.ThongTin.MaSoBHXH,
                     tuNgay = item.ThongTin.TuNgay?.ToString(Constant.Constant.DINH_DANG_NGAY_THANG),
                     denNgay = item.ThongTin.DenNgay?.ToString(Constant.Constant.DINH_DANG_NGAY_THANG),
                     ngay5NamLienTuc = item.ThongTin.Ngay5NamLienTuc?.ToString(Constant.Constant.DINH_DANG_NGAY_THANG),
@@ -181,6 +224,8 @@ namespace TraCuuBHXH_BHYT.Service
             }
             catch (DbUpdateException dbEx)
             {
+                log.KetQua = 0;
+                await TrySaveLogAsync(log);
                 // Lỗi khi cập nhật database
                 return new ResponseTraCuuBHXHVN
                 {
@@ -191,6 +236,8 @@ namespace TraCuuBHXH_BHYT.Service
             catch (Exception ex)
             {
                 // Lỗi chung
+                log.KetQua = 0;
+                await TrySaveLogAsync(log);
                 return new ResponseTraCuuBHXHVN
                 {
                     maLoi = Constant.Constant.MA_LOI_THAT_BAI,
@@ -207,6 +254,28 @@ namespace TraCuuBHXH_BHYT.Service
             if (ngaySinh.EndsWith("01")) return 2;           // Chỉ tháng + năm
 
             return 0;  // Đủ ngày
+        }
+
+        private async Task TrySaveLogAsync(RequestSaveLog log)
+        {
+            try
+            {
+                var entity = new LogTraCuuEntity
+                {
+                    ThoiGianTraCuu = log.ThoiGianTraCuu,
+                    MaTraCuu = log.MaTraCuu,
+                    HoTenTraCuu = log.HoTenTraCuu,
+                    NgaySinhTraCuu = log.NgaySinhTraCuu,
+                    GioiTinhTraCuu = log.GioiTinhTraCuu,
+                    Type = log.Type,
+                    KetQua = log.KetQua
+                };
+                await _db.LogTraCuu.AddAsync(entity);
+                await _db.SaveChangesAsync();
+            }
+            catch
+            {
+            }
         }
 
         public async Task<ResponseUpdateBHXHVN> ThemHoacCapNhatAsync(RequestUpdateBHXHVN request)
@@ -240,10 +309,7 @@ namespace TraCuuBHXH_BHYT.Service
                 
                 var existingRecord = await _db.ThongTinTheBHYT
                     .FirstOrDefaultAsync(x =>
-                        x.SoCCCD.Trim() == request.SoCccd.Trim() &&
-                        x.HoTen.Trim().ToUpper() == request.HoTen.Trim().ToUpper() &&
-                        x.GioiTinh == gioiTinhInverted &&
-                        x.NgaySinh.Trim() == request.NgaySinh.Trim());
+                        x.Id == request.Id);
 
                 // ============================
                 // 3. Update hoặc Insert
@@ -255,7 +321,7 @@ namespace TraCuuBHXH_BHYT.Service
                     existingRecord.IDTheBHYT = request.IDTheBHYT ?? existingRecord.IDTheBHYT;
                     //existingRecord.IDDonVi = request.IDDonVi ?? existingRecord.IDDonVi;
                     //existingRecord.IdDoiTuong = request.IDDoiTuong != null ? (short)request.IDDoiTuong : existingRecord.IdDoiTuong;
-                    existingRecord.MaCSKCB = request.IDBenhVien.ToString();
+                    existingRecord.MaCSKCB = request.MaCSKCB.ToString();
                     existingRecord.MaSoBHXH = request.MaSoBHXH ?? existingRecord.MaSoBHXH;
                     existingRecord.MaTheBHYT = request.MiCardNum ?? existingRecord.MaTheBHYT;
 
@@ -283,6 +349,9 @@ namespace TraCuuBHXH_BHYT.Service
 
                     existingRecord.IsOnlyBirthYear = request.IsOnlyBirthYear ?? existingRecord.IsOnlyBirthYear;
                     existingRecord.TenBenhVien = request.TenBenhVien ?? existingRecord.TenBenhVien;
+                    existingRecord.MaKCB = request.MaKCB ?? existingRecord.MaKCB;
+                    existingRecord.IdDoiTuong = request.IDDoiTuong ?? existingRecord.IdDoiTuong;
+                    existingRecord.IDDonVi = request.IDDonVi ?? existingRecord.IDDonVi;
 
                     _db.ThongTinTheBHYT.Update(existingRecord);
                     await _db.SaveChangesAsync();
@@ -297,7 +366,9 @@ namespace TraCuuBHXH_BHYT.Service
                         gioiTinh = existingRecord.GioiTinh == Constant.Constant.GIOI_TINH_NU ? Constant.Constant.GIOI_TINH_NAM : Constant.Constant.GIOI_TINH_NU,
                         maThe = existingRecord.MaTheBHYT,
                         nguoiGui = Constant.Constant.NGUOI_GUI,
-                        ngayCapNhat = existingRecord.UpdatedDate
+                        ngayCapNhat = existingRecord.UpdatedDate,
+                        diaChi = existingRecord.DiaChi,
+                        maDoiTuong = existingRecord.MaKCB
                     };
                 }
                 else
@@ -310,7 +381,6 @@ namespace TraCuuBHXH_BHYT.Service
                         CreatedDate = request.CreatedDate != null ? request.CreatedDate : DateTime.Now,
                         IDTheBHYT = request.IDTheBHYT != null ? (long)request.IDTheBHYT : 0,
                         MaCSKCB = request.IDBenhVien.ToString(),
-                       
                         MaSoBHXH = request.MaSoBHXH,
                         MaTheBHYT = request.MiCardNum,
                         TuNgay = request.TuNgay != null ? DateOnly.FromDateTime((DateTime)request.TuNgay) : null,
@@ -324,6 +394,9 @@ namespace TraCuuBHXH_BHYT.Service
                         GioiTinh = gioiTinhInverted,
                         IsOnlyBirthYear = request.IsOnlyBirthYear,
                         TenBenhVien = request.TenBenhVien,
+                        MaKCB = request.MaKCB,
+                        IDDonVi = request.IDDonVi != null ? (long)request.IDDonVi : 0,
+                        IdDoiTuong = request.IDDoiTuong != null ? (short)request.IDDoiTuong : (short)0
                     };
 
                     _db.ThongTinTheBHYT.Add(newRecord);
@@ -339,7 +412,9 @@ namespace TraCuuBHXH_BHYT.Service
                         gioiTinh = newRecord.GioiTinh == Constant.Constant.GIOI_TINH_NU ? Constant.Constant.GIOI_TINH_NAM : Constant.Constant.GIOI_TINH_NU,
                         maThe = newRecord.MaSoBHXH,
                         nguoiGui = Constant.Constant.NGUOI_GUI,
-                        ngayCapNhat = newRecord.UpdatedDate
+                        ngayCapNhat = newRecord.UpdatedDate,
+                        diaChi = newRecord.DiaChi,
+                        maDoiTuong = newRecord.MaKCB
                     };
                 }
             }
@@ -359,6 +434,75 @@ namespace TraCuuBHXH_BHYT.Service
                     moTaLoi = "Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau."
                 };
             }
+
+
+        }
+
+        public async Task<ResponseSearchLog> SearchLogTraCuu(string role, RequestSearchLog request)
+        {
+            var Roles = _db.DMParameter
+                   .AsNoTracking()
+                   .FirstOrDefault(x => x.Key == "Role" && x.IsActive == true);
+            if(role.Trim() != Roles.Value.ToString().Trim())
+            {
+                return new ResponseSearchLog
+                {
+                    Total = -1,
+                    Message = "Bạn không có quyền truy cập chức năng này"
+                };
+            }    
+            var from = request.FromDate;
+            var to = request.ToDate;
+            if (from > to)
+            {
+                var tmp = from;
+                from = to;
+                to = tmp;
+            }
+            // Bao trùm nguyên ngày ToDate
+            var endExclusive = to.Date.AddDays(1);
+
+            var query = _db.LogTraCuu.AsNoTracking()
+                .Where(x => x.ThoiGianTraCuu >= from && x.ThoiGianTraCuu < endExclusive);
+
+            if (!string.IsNullOrWhiteSpace(request.MaTraCuu))
+            {
+                var ma = request.MaTraCuu.Trim();
+                query = query.Where(x => x.MaTraCuu != null && x.MaTraCuu.Contains(ma));
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Hoten))
+            {
+                var name = request.Hoten.Trim().ToUpper();
+                query = query.Where(x => x.HoTenTraCuu != null && x.HoTenTraCuu.ToUpper().Contains(name));
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.NgaySinh))
+            {
+                var ns = request.NgaySinh.Trim();
+                query = query.Where(x => x.NgaySinhTraCuu != null && x.NgaySinhTraCuu.Contains(ns));
+            }
+
+            var list = await query
+                .OrderByDescending(x => x.ThoiGianTraCuu)
+                .Select(x => new ResponseSearchLogItem
+                {
+                    Id = x.Id,
+                    ThoiGianTraCuu = x.ThoiGianTraCuu,
+                    MaTraCuu = x.MaTraCuu,
+                    HoTenTraCuu = x.HoTenTraCuu,
+                    NgaySinhTraCuu = x.NgaySinhTraCuu,
+                    GioiTinhTraCuu = x.GioiTinhTraCuu,
+                    Type = x.Type,
+                    KetQua = x.KetQua
+                })
+                .ToListAsync();
+
+            return new ResponseSearchLog
+            {
+                Total = list.Count,
+                Data = list
+            };
         }
     }
 }

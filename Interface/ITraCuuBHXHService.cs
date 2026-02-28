@@ -1,4 +1,4 @@
-﻿using TraCuuBHXH_BHYT.Request;
+using TraCuuBHXH_BHYT.Request;
 using TraCuuBHXH_BHYT.Response;
 using System.Threading.Tasks;
 
@@ -8,5 +8,6 @@ namespace TraCuuBHXH_BHYT.Interface
     {
         Task<ResponseTraCuuBHXHVN> TraCuuBHXHQDAsync(RequestTraCuuBHXHVN request);
         Task<ResponseUpdateBHXHVN> ThemHoacCapNhatAsync(RequestUpdateBHXHVN request);
+        Task<ResponseSearchLog> SearchLogTraCuu(string role, RequestSearchLog request);
     }
 }

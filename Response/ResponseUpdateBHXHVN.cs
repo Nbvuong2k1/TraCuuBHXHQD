@@ -8,12 +8,11 @@ namespace TraCuuBHXH_BHYT.Response
         public string? gioiTinh { get; set; }
         public string? maThe { get; set; }
         public string? diaChi { get; set; }
-        public string? namSinh { get; set; }
+      //  public string? namSinh { get; set; }
         public int? maLoi { get; set; }
         public string? moTaLoi{ get; set; }
         public string? nguoiGui{ get; set; }
         public DateTime? ngayCapNhat{ get; set; }
         public string? maDoiTuong {get; set; }
-        public string? tenDoiTuong {get; set; }
     }
 }

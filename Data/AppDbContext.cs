@@ -14,6 +14,7 @@ namespace TraCuuBHXH_BHYT.Data
         public DbSet<DoituongEntity> DoiTuong { get; set; }
         public DbSet<DMParameterEntity> DMParameter { get; set; }
         public DbSet<DMKhoiKCBEntity> DMKhoiKCB { get; set; }
+        public DbSet<LogTraCuuEntity> LogTraCuu { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -21,6 +22,7 @@ namespace TraCuuBHXH_BHYT.Data
             modelBuilder.ApplyConfiguration(new Configuration.DoiTuongConfiguration());
             modelBuilder.ApplyConfiguration(new Configuration.DMParameterConfiguration());
             modelBuilder.ApplyConfiguration(new Configuration.DMKhoiKCBConfiguration());
+            modelBuilder.ApplyConfiguration(new Configuration.LogTraCuuConfigurtion());
             base.OnModelCreating(modelBuilder);
         }
     }

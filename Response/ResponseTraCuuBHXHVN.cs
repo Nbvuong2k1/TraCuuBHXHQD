@@ -7,6 +7,7 @@
         public string? ngaySinh { get; set; }
         public string? gioiTinh { get; set; }
         public string? maThe { get; set; }
+        public string? maSoBhxh { get; set; }
         public string? tuNgay { get; set; }
         public string? denNgay { get; set; }
         public string? ngay5NamLienTuc { get; set; }

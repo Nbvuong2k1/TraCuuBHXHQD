@@ -138,7 +138,7 @@ namespace TraCuuBHXH_BHYT.Service
                 {
                     throw new UnauthorizedAccessException("Thiếu header Authorization");
                 }
-
+                Console.WriteLine( "cơ sở dữ liệu:",_db.Database.GetDbConnection().ConnectionString);
                 var param = await _db.DMParameter
                     .FirstOrDefaultAsync(x => x.Key == "Base64" && x.IsActive == true);
 
