@@ -166,15 +166,14 @@ namespace TraCuuBHXH_BHYT.Service
                 }
 
                 // Load DMKhoiKCB dựa trên 2 ký tự đầu của MaTheBHYT (MiCardNum)
-                DMKhoiKCBEntity? dmKhoiKCB = null;
+                string tenKhoi = string.Empty;
                 if (!string.IsNullOrEmpty(item.ThongTin.MaKCB))
                 {
                     var maKhoi = item.ThongTin.MaKCB;
-                    dmKhoiKCB = await _db.DMKhoiKCB
+                    var dmKhoiKCB = await _db.DMKhoiKCB
+                        .AsNoTracking()
                         .FirstOrDefaultAsync(x => x.Ma == maKhoi);
-
-                    // Gán vào navigation property
-                    item.ThongTin.KhoiKCB.Ten = dmKhoiKCB.Ten.ToString();
+                    tenKhoi = dmKhoiKCB?.Ten ?? string.Empty;
                 }
 
                 // ============================
@@ -219,7 +218,7 @@ namespace TraCuuBHXH_BHYT.Service
                     nguoiGui = Constant.Constant.NGUOI_GUI,
                     ngayCapNhat = item.ThongTin.UpdatedDate,
                     maDoiTuong = item.ThongTin.MaKCB,
-                    tenDoiTuong = item.ThongTin.KhoiKCB?.Ten,
+                    tenDoiTuong = tenKhoi,
                 };
             }
             catch (DbUpdateException dbEx)
